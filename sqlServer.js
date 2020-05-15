@@ -53,22 +53,56 @@ function addEmployeeQuestions()
         {
             type: "input",
             name: "first",
-            message: "What is the employees first name?"
+            message: "What is the employees first name?",
+            validate: function checkName(firstName)
+            {
+                if(firstName !== '')
+                    return true;
+                console.log("Please Input A Name")
+                return false;
+            }
         },
         {
             type: "input",
             name: "last",
-            message: "What is the employees last name?"
+            message: "What is the employees last name?",
+            validate: function checkName(lastName)
+            {
+                if(lastName !== '')
+                    return true;
+                console.log("Please Input A Name")
+                return false;
+            }
         },
         {
             type: "input",
             name: "roleId",
-            message: "What is the employees role id?"
+            message: "What is the employees role id?",
+            validate: function checkNumber(roleId)
+            {
+                roleId = parseInt(roleId);
+                if(isNaN(roleId))
+                {
+                    console.log("Please Input A Number");
+                    return false;
+                }
+                return true;
+            }
         },
         {
             type: "input",
             name: "managerId",
-            message: "What is the employees manager id?"
+            message: "What is the employees manager id?",
+            validate: function checkNumber(roleId)
+            {
+                roleId = parseInt(roleId);
+                if(isNaN(roleId))
+                {
+                    console.log("Please Input A Number");
+                    return false;
+                }
+                return true;
+            }
         }
     ]);
 }
@@ -87,20 +121,21 @@ const connection = mysql.createConnection({
 connection.connect(async err =>{
     if(err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-    const action = await initialQuestion();
-    const table = await addOrViewQuestions(action.action);
-    switch(table.table)
-    {
-        case "Departments":
-            break;
-        case "Roles":
-            await addRoleQuestions();
-            break;
-        case "Employees":
-            break;
-        default:
-            break;
-    }
+    // const action = await initialQuestion();
+    // const table = await addOrViewQuestions(action.action);
+    // switch(table.table)
+    // {
+    //     case "Departments":
+    //         break;
+    //     case "Roles":
+    //         await addRoleQuestions();
+    //         break;
+    //     case "Employees":
+    //         const addEmpl = await addEmployeeQuestions();
+    //         break;
+    //     default:
+    //         break;
+    // }
 });
 
 // CREATE
