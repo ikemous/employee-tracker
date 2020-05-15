@@ -1,6 +1,6 @@
 // Import depenencies
-    //Inquirer
-    //sql
+const inquirer = require("inquirer");
+const mysql = require("mysql");
 
 
 // Create Connection to the sql
