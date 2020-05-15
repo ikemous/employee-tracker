@@ -47,6 +47,32 @@ function addRoleQuestions()
     ]);
 }
 
+function addEmployeeQuestions()
+{
+    return inquirer.prompt([
+        {
+            type: "input",
+            name: "first",
+            message: "What is the employees first name?"
+        },
+        {
+            type: "input",
+            name: "last",
+            message: "What is the employees last name?"
+        },
+        {
+            type: "input",
+            name: "roleId",
+            message: "What is the employees role id?"
+        },
+        {
+            type: "input",
+            name: "managerId",
+            message: "What is the employees manager id?"
+        }
+    ]);
+}
+
 
 // Create Connection to the sql\
 const connection = mysql.createConnection({
