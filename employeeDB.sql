@@ -29,5 +29,6 @@ CREATE TABLE employee(
     firstName VARCHAR(30) NOT NULL,
     lastName VARCHAR(30) NOT NULL,
     roleId INTEGER(11) NOT NULL,
-    ManagerId Integer(11)
+    ManagerId Integer(11),
+    PRIMARY KEY(id)
 )
