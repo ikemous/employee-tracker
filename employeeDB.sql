@@ -12,16 +12,16 @@ CREATE TABLE department(
     id INTEGER(11) AUTO_INCREMENT NOT NULL,
     name VARCHAR(30) NOT NULL,
     PRIMARY KEY(id)
-)
+);
 
 -- create table 2
 CREATE TABLE role(
     id INTEGER(11) AUTO_INCREMENT NOT NULL,
     title VARCHAR(30) NOT NULL,
-    salary INTEGER(11),
-    departmentId INTEGER(11) NOT NULL,
+    salary DECIMAL(11,4),
+    departmentId INTEGER(11),
     PRIMARY KEY(id)
-)
+);
 
 -- create table 3
 CREATE TABLE employee(
@@ -31,4 +31,4 @@ CREATE TABLE employee(
     roleId INTEGER(11) NOT NULL,
     ManagerId Integer(11),
     PRIMARY KEY(id)
-)
+);

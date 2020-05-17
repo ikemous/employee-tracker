@@ -121,6 +121,9 @@ const connection = mysql.createConnection({
 connection.connect(async err =>{
     if(err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+    // viewTable("department");
+    viewTable("role");
+    viewTable("employee");
     // const action = await initialQuestion();
     // const table = await addOrViewQuestions(action.action);
     // switch(table.table)
@@ -141,10 +144,28 @@ connection.connect(async err =>{
 // CREATE
 function insertIntoTable(table, information)
 {
-
+    const query = "INSERT INTO ? SET ?";
+    connection.query(query,
+    [
+        table, information
+    ],
+    function(err, res) {
+        if (err) throw err;
+        console.log(res.affectedRows + " product inserted!\n");
+    });
 }
 
 // READ
+function viewTable(table)
+{
+    const query = "SELECT * FROM department";
+    connection.query(query,
+        [table],
+        (err, res) =>{
+            if(err) throw err;
+            console.log(table + "\n" + "-------------------------" + res);
+        });
+}
 
 // UPDATE
 
