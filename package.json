@@ -18,8 +18,11 @@
   },
   "homepage": "https://github.com/ikemous/employee-tracker#readme",
   "dependencies": {
+    "console-clear": "^1.1.1",
     "console.table": "^0.10.0",
     "inquirer": "^7.1.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "node-emoji": "^1.10.0",
+    "print-message": "^3.0.1"
   }
 }

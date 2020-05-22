@@ -10,7 +10,7 @@ USE employeeDB;
 -- create table 1
 CREATE TABLE department(
     id INTEGER(11) AUTO_INCREMENT NOT NULL,
-    name VARCHAR(30) NOT NULL,
+    department VARCHAR(30) NOT NULL,
     PRIMARY KEY(id)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE employee(
     id INTEGER(11) AUTO_INCREMENT NOT NULL,
     firstName VARCHAR(30) NOT NULL,
     lastName VARCHAR(30) NOT NULL,
-    roleId INTEGER(11) NOT NULL,
-    ManagerId Integer(11),
+    roleId INTEGER(11),
+    managerId Integer(11),
     PRIMARY KEY(id)
 );
