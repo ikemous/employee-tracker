@@ -60,6 +60,13 @@ function runProgram()
 
 
 //#region  validations
+
+/**
+ * checkNumber()
+ * Purpose: Check if given variable is a number
+ * Parameters: salary - Number To Be Checked
+ * Return: boolean of True(Variable is a Number) or False(Variable isn't a number) 
+ */
 const checkNumber = salary =>{
     salary = parseInt(salary);
     if(isNaN(salary))
@@ -68,14 +75,20 @@ const checkNumber = salary =>{
         return false;
     }
     return true;
-}
+}//End checkNumber()
 
-const checkName = lastName =>{
-    if(lastName !== '')
+/**
+ * checkName()
+ * Purpose: Check if given variable is a string
+ * Parameters: name - Variable to be checked
+ * Return: boolean of True(Variable is a string) or False(Variable isn't a string) 
+ */
+const checkName = name =>{
+    if(name !== '')
         return true;
     console.log("Please Input A Name");
     return false;
-}
+}//End checkName()
 
 //#endregion validations
 
