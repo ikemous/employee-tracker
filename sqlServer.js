@@ -57,6 +57,26 @@ function runProgram()
     })
 }
 
+//#region  validations
+const checkNumber = salary =>{
+    salary = parseInt(salary);
+    if(isNaN(salary))
+    {
+        console.log("Please Input A Number");
+        return false;
+    }
+    return true;
+}
+
+const checkName = lastName =>{
+    if(lastName !== '')
+        return true;
+    console.log("Please Input A Name");
+    return false;
+}
+
+//#endregion validations
+
 function actionChoice(action)
 {
     let userChoices = ["department", "role", "employee"];
@@ -153,16 +173,7 @@ function addRoleQuestions()
                 type: "input",
                 name: "salary",
                 message: "What is the salary for this role?",
-                validate: function checkNumber(salary)
-                {
-                    salary = parseInt(salary);
-                    if(isNaN(salary))
-                    {
-                        console.log("Please Input A Number");
-                        return false;
-                    }
-                    return true;
-                }
+                validate: checkNumber
             },
             {
                 type: "list",
@@ -203,25 +214,13 @@ function addEmployeeQuestions()
                     type: "input",
                     name: "firstName",
                     message: "What is the employees first name?",
-                    validate: function checkName(firstName)
-                    {
-                        if(firstName !== '')
-                            return true;
-                        console.log("Please Input A Name")
-                        return false;
-                    }
+                    validate: checkName
                 },
                 {
                     type: "input",
                     name: "lastName",
                     message: "What is the employees last name?",
-                    validate: function checkName(lastName)
-                    {
-                        if(lastName !== '')
-                            return true;
-                        console.log("Please Input A Name");
-                        return false;
-                    }
+                    validate: checkName
                 },
                 {
                     type: "list",
@@ -345,16 +344,7 @@ function updateRole(theRole)
                 name: "salary",
                 message: "Please enter updated salary or press (Enter)",
                 default: theRole.salary,
-                validate: function checkNumber(salary)
-                {
-                    salary = parseInt(salary);
-                    if(isNaN(salary))
-                    {
-                        console.log("Please Input A Number");
-                        return false;
-                    }
-                    return true;
-                }
+                validate: checkNumber
             },
             {
                 type: "list",
@@ -429,26 +419,14 @@ function updateEmployee(emp)
                     name: "firstName",
                     message: "Please enter updated name or press (Enter)",
                     default: emp.firstName,
-                    validate: function checkName(lastName)
-                    {
-                        if(lastName !== '')
-                            return true;
-                        console.log("Please Input A Name");
-                        return false;
-                    }
+                    validate: checkName
                 },
                 {
                     type: "input",
                     name: "lastName",
                     message: "Please enter updated name or press (Enter)",
                     default: emp.lastName,
-                    validate: function checkName(lastName)
-                    {
-                        if(lastName !== '')
-                            return true;
-                        console.log("Please Input A Name");
-                        return false;
-                    }
+                    validate: checkName
                 },
                 {
                     type: "list",
