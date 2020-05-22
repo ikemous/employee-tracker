@@ -1,11 +1,12 @@
 // Import depenencies
-const inquirer = require("inquirer");
-const mysql = require("mysql");
-const table = require("console.table");
-const printMessage = require('print-message');
-const emoji = require('node-emoji');
+const inquirer = require("inquirer");//Used To Ask Questions in the Console
+const mysql = require("mysql");//Used to Modify or obtain SQL informations
+const table = require("console.table");//Used to Display SQL information
+const printMessage = require('print-message');// Used for the Greeting Message
+const emoji = require('node-emoji');//EMOJIIII!!!!!!!
 
-// Create Connection to the sql\
+// Create Connection to the sql
+// Information will need to be changed for your sql server
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -15,7 +16,7 @@ const connection = mysql.createConnection({
 });
 
 // Connect SQL to create queries
-connection.connect(async err =>{
+connection.connect(err =>{
     if(err) throw err;
 
     printMessage([
@@ -57,6 +58,7 @@ function runProgram()
     })
 }
 
+
 //#region  validations
 const checkNumber = salary =>{
     salary = parseInt(salary);
@@ -76,6 +78,9 @@ const checkName = lastName =>{
 }
 
 //#endregion validations
+
+
+//#region programFunctions
 
 function actionChoice(action)
 {
@@ -450,6 +455,10 @@ function updateEmployee(emp)
 
 }
 
+//#endregion programfunctions
+
+
+//#region sqlQueryFunctions
 // CREATE
 function insertIntoTable(table, information)
 {
@@ -523,3 +532,4 @@ function deleteFromTable(table, itemId)
     })
 
 }
+//#endregion sqlQueryFunctions
