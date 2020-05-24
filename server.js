@@ -3,7 +3,6 @@ const inquirer = require("inquirer");//Used To Ask Questions in the Console
 const mysql = require("mysql");//Used to Modify or obtain SQL informations
 const table = require("console.table");//Used to Display SQL information
 const printMessage = require('print-message');// Used for the Greeting Message
-const emoji = require('node-emoji');//EMOJIIII!!!!!!!
 
 // Create Connection to the sql
 // Information will need to be changed for your sql server
@@ -49,11 +48,15 @@ function runProgram()
                 "View",
                 "Add",
                 "Update",
-                "Delete"
+                "Delete",
+                "Exit"
             ]
         }
     ]).then(answer =>{
-        actionChoice(answer.action)
+        if(answer.action === "Exit")
+            connection.end();
+        else
+            actionChoice(answer.action);
     })
 }
 
@@ -272,7 +275,6 @@ function addEmployeeQuestions()
                                 [answer, {id: itemId}],(err, result)=>{
                                 if(err) throw err;
                                 runProgram();
-
                             });
                         });
                     });
