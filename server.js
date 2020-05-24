@@ -19,6 +19,7 @@ const connection = mysql.createConnection({
 connection.connect(err =>{
     if(err) throw err;
 
+
     printMessage([
         "Welcome To The Employee Tracker!!!",
         "Please Follow The Prompts To Alter Your Employee",
@@ -33,8 +34,6 @@ connection.connect(err =>{
         marginBottom: 2,
     });
 
-    const pizza = emoji.get(':pizza:');
-    console.log(pizza);
     runProgram();
 
 });
@@ -67,9 +66,9 @@ function runProgram()
  * Parameters: salary - Number To Be Checked
  * Return: boolean of True(Variable is a Number) or False(Variable isn't a number) 
  */
-const checkNumber = salary =>{
-    salary = parseInt(salary);
-    if(isNaN(salary))
+const checkNumber = number =>{
+    number = parseInt(number);
+    if(isNaN(number))
     {
         console.log("Please Input A Number");
         return false;
@@ -83,10 +82,10 @@ const checkNumber = salary =>{
  * Parameters: name - Variable to be checked
  * Return: boolean of True(Variable is a string) or False(Variable isn't a string) 
  */
-const checkName = name =>{
-    if(name !== '')
+const checkString = string =>{
+    if(string !== '')
         return true;
-    console.log("Please Input A Name");
+    console.log("Please Input A SomeText");
     return false;
 }//End checkName()
 
@@ -164,7 +163,8 @@ function addDepartmentQuestions()
         {
             type: "input",
             name: "department",
-            message: "What is the department name?"
+            message: "What is the department name?",
+            validate: checkString
         }
     ]).then(answer=>{
         insertIntoTable("department", answer);
@@ -185,7 +185,8 @@ function addRoleQuestions()
             {
                 type: "input",
                 name: "title",
-                message: "What is the new role title?"
+                message: "What is the new role title?",
+                validate: checkString
             },
             {
                 type: "input",
@@ -216,52 +217,69 @@ function addEmployeeQuestions()
         for(let i = 0; i < res.length; i++)
             roleChoices.push(`${i + 1}) ${res[i].title}`);
 
-        const employeeQuery = `SELECT T1.id, CONCAT(T1.firstName, ' ', T1.lastName) AS 'Manager'
-        FROM employee AS T1
-        INNER JOIN role AS T2 ON T1.roleId = T2.id
-        WHERE T2.title = "Manager"`;
-        connection.query(employeeQuery, (err, res)=>{
-            if(err) throw err;
-
-            let managerChoices = [];
-            for(let i = 0; i < res.length; i++)
-                managerChoices.push(`${res[i].id}(ID) ${res[i].Manager}`);
-
             inquirer.prompt([
                 {
                     type: "input",
                     name: "firstName",
                     message: "What is the employees first name?",
-                    validate: checkName
+                    validate: checkString
                 },
                 {
                     type: "input",
                     name: "lastName",
                     message: "What is the employees last name?",
-                    validate: checkName
+                    validate: checkString
                 },
                 {
                     type: "list",
                     name: "roleId",
                     message: "What is the employees role id?",
                     choices: roleChoices
-                },
-                {
-                    type: "list",
-                    name: "managerId",
-                    message: "What is the employees manager id?",
-                    choices: managerChoices
                 }
             ]).then(answers=>{
                 answers.roleId = answers.roleId.split(')')[0];
-                answers.managerId = answers.managerId.split('(')[0];
-                insertIntoTable("employee", answers);
-            });
-        });
-            
-        
-    });
+                const query = "INSERT INTO `employee` SET ?";
+                connection.query(query, answers, (err, insertRes)=>{
+                    if(err) throw err;
 
+                    // console.log(insertRes);
+                    const itemId = insertRes.insertId
+                    // console.log(id);
+
+                    const managerQuery = `SELECT T1.id, CONCAT(T1.firstName, ' ', T1.lastName) AS 'Manager'
+                    FROM employee AS T1
+                    INNER JOIN role AS T2 ON T1.roleId = T2.id
+                    WHERE T2.title = "Manager"`;
+                    connection.query(managerQuery, (err, res)=>{
+                        if(err) throw err;
+            
+                        let managerChoices = [];
+                        for(let i = 0; i < res.length; i++)
+                            managerChoices.push(`${res[i].id}(ID) ${res[i].Manager}`);
+
+
+                        inquirer.prompt([
+                            {
+                                type: "list",
+                                name: "managerId",
+                                message: "What is the employees manager id?",
+                                choices: managerChoices
+                            }
+                        ]).then(answer=>{
+                            answer.managerId = answer.managerId.split('(')[0];
+                            const query = "UPDATE `employee` SET ? WHERE ?";
+                            connection.query(query, 
+                                [answer, {id: itemId}],(err, result)=>{
+                                if(err) throw err;
+                                runProgram();
+
+                            });
+                        });
+                    });
+                });
+            });
+    });
+            
 }
 
 function chooseDepartment(action)
@@ -437,14 +455,14 @@ function updateEmployee(emp)
                     name: "firstName",
                     message: "Please enter updated name or press (Enter)",
                     default: emp.firstName,
-                    validate: checkName
+                    validate: checkString
                 },
                 {
                     type: "input",
                     name: "lastName",
                     message: "Please enter updated name or press (Enter)",
                     default: emp.lastName,
-                    validate: checkName
+                    validate: checkString
                 },
                 {
                     type: "list",
@@ -470,7 +488,6 @@ function updateEmployee(emp)
 
 //#endregion programfunctions
 
-
 //#region sqlQueryFunctions
 // CREATE
 function insertIntoTable(table, information)
@@ -492,6 +509,7 @@ function viewTable(table)
         table,
         (err, res) =>{
             if(err) throw err;
+            console.log('\n')
             console.table(res);
             runProgram();
         });
@@ -505,9 +523,9 @@ function viewAllInformation()
     LEFT JOIN department AS third ON (third.id = second.departmentId)
     LEFT JOIN employee AS manager ON (manager.id = main.managerId);`
 
-    connection.query(query,(err, res)=>{
+    connection.query(query, (err, res)=>{
         if(err) throw err;
-        // console.log(res);
+        console.log('\n');
         console.table(res);
         runProgram();
     });
@@ -527,7 +545,7 @@ function updateTable(table, information, itemId)
         ],
         (err,res) =>{
             if(err) throw err;
-            console.log("Row updated");
+            console.log("Row updated \n");
             runProgram(); 
         });
 }
@@ -540,7 +558,7 @@ function deleteFromTable(table, itemId)
         [table, itemId],
         (err, res)=>{
         if(err) throw err;
-        console.log("Row Deleted");
+        console.log("Row Deleted \n");
         runProgram();
     })
 

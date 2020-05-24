@@ -19,8 +19,10 @@ USE employeeDB;
 -- ("Daphne", "Blake", 2, 3);
 
 -- SELECT * FROM department;
-SELECT * FROM role;
--- SELECT * FROM employee;
+-- SELECT * FROM role;
+SELECT * FROM employee;
+
+-- UPDATE employee SET managerId = 2 WHERE id = 6;
 
 -- DELETE FROM role
 -- WHERE id = 2;
