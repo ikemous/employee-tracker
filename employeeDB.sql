@@ -9,26 +9,26 @@ USE employeeDB;
 
 -- create table 1
 CREATE TABLE department(
-    id INTEGER(11) AUTO_INCREMENT NOT NULL,
+    id INTEGER(15) AUTO_INCREMENT NOT NULL,
     department VARCHAR(30) NOT NULL,
     PRIMARY KEY(id)
 );
 
 -- create table 2
 CREATE TABLE role(
-    id INTEGER(11) AUTO_INCREMENT NOT NULL,
-    title VARCHAR(30) NOT NULL,
+    id INTEGER(15) AUTO_INCREMENT NOT NULL,
+    title VARCHAR(255) NOT NULL,
     salary DECIMAL(15,2),
-    departmentId INTEGER(11),
+    departmentId INTEGER(15),
     PRIMARY KEY(id)
 );
 
 -- create table 3
 CREATE TABLE employee(
-    id INTEGER(11) AUTO_INCREMENT NOT NULL,
-    firstName VARCHAR(30) NOT NULL,
-    lastName VARCHAR(30) NOT NULL,
-    roleId INTEGER(11),
-    managerId INTEGER(11),
+    id INTEGER(15) AUTO_INCREMENT NOT NULL,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    roleId INTEGER(15),
+    managerId INTEGER(15),
     PRIMARY KEY(id)
 );

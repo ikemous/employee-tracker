@@ -23,6 +23,7 @@ connection.connect(err =>{
         "Welcome To The Employee Tracker!!!",
         "Please Follow The Prompts To Alter Your Employee",
         "Database To Your Needs!!!",
+        "To Have Any Managers You Must Have A Manager Role",
         "Mode With Love By - Ikemous"
     ],
     {
@@ -31,7 +32,7 @@ connection.connect(err =>{
         borderColor: "blue",
         marginTop: 2,
         marginBottom: 2,
-    });
+    });//End Program Message
 
     //Start The Program
     runProgram();
@@ -50,7 +51,7 @@ function runProgram()
         {
             type: "list",
             name: "action",
-            message: "Please Choose What You Would Like To Do:",
+            message: "Please Choose What You Would Like To Do To The Database:",
             choices: [
                 "View",
                 "Add",
@@ -115,7 +116,7 @@ function actionChoice(action)
     let userChoices = ["department", "role", "employee"];
     if(action === "View")
         userChoices.push("all");
-
+    userChoices.push("Back");
     inquirer.prompt([
         {
             type: "list",
@@ -124,53 +125,61 @@ function actionChoice(action)
             choices: userChoices
         },
     ]).then(answer =>{
-        //check User Action Choice
-        switch(action)
+
+        if(answer.table === "Back")
+            runProgram();
+        else
         {
-            case "View":
-                if(answer.table === "all")
-                {
-                    viewAllInformation();
+            //check User Action Choice
+            switch(action)
+            {
+                case "View":
+                    if(answer.table === "all")
+                    {
+                        viewAllInformation();
+                        break;
+                    }
+                    viewTable(answer.table);
                     break;
-                }
-                viewTable(answer.table);
-                break;
-            case "Add":
-                switch(answer.table)
-                {
-                    case "department":
-                        addDepartmentQuestions();
-                        break;
-                    case "role":
-                        addRoleQuestions();
-                        break;
-                    case "employee":
-                        addEmployeeQuestions();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case "Update":
-            case "Delete":
-                switch(answer.table)
-                {
-                    case "department":
-                        chooseDepartment(action);
-                        break;
-                    case "role":
-                        chooseRole(action);
-                        break;
-                    case "employee":
-                        chooseEmployee(action);
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
+                case "Add":
+                    switch(answer.table)
+                    {
+                        case "department":
+                            addDepartmentQuestions();
+                            break;
+                        case "role":
+                            addRoleQuestions();
+                            break;
+                        case "employee":
+                            addEmployeeQuestions();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "Update":
+                case "Delete":
+                    switch(answer.table)
+                    {
+                        case "department":
+                            chooseDepartment(action);
+                            break;
+                        case "role":
+                            chooseRole(action);
+                            break;
+                        case "employee":
+                            chooseEmployee(action);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+        
+
     });
 }//End actionChoice()
 
@@ -190,6 +199,7 @@ function addDepartmentQuestions()
             validate: checkString
         }
     ]).then(answer=>{
+        answer.department = capitalize_Words(answer.department);
         insertIntoTable("department", answer);
     });
 }//End addDepartmentQuestions
@@ -202,6 +212,16 @@ function addDepartmentQuestions()
  */
 function addRoleQuestions()
 {
+    //Beginning Program Message
+    printMessage([
+        'To Have Any Managers You Must Have A "Manager" Role'
+    ],
+    {
+        border: true,
+        color: "default",
+        borderColor: "blue"
+    });//End Program Message
+
     //Query All Departments
     const query = "SELECT * FROM `department`"
     connection.query(query, (err, res)=>{
@@ -211,6 +231,8 @@ function addRoleQuestions()
         let depChoices = [];
         for(let i = 0; i < res.length; i++)
             depChoices.push(`${res[i].id}) ${res[i].department}`);
+        
+        depChoices.push("None");
 
         inquirer.prompt([
             {
@@ -232,7 +254,12 @@ function addRoleQuestions()
                 choices: depChoices
             },
         ]).then(answers=>{
-            answers.departmentId = answers.departmentId.split(')')[0];
+            if(answers.departmentId == "None")
+                answers.departmentId = null;
+            else
+                answers.departmentId = answers.departmentId.split(')')[0];
+            answers.title = capitalize_Words(answers.title);
+
             insertIntoTable("role", answers);
         }); 
     });//End Deparment Query
@@ -246,6 +273,19 @@ function addRoleQuestions()
  */
 function addEmployeeQuestions()
 {
+    //Beginning Program Message
+    printMessage([
+        'To Be Recognized as a Manager The Employee Must Be',
+        'Assigned To A "Manager" Role. You May Update The ',
+        'Employee Later If You Haven\'t Created It Yet'
+    ],
+    {
+        border: true,
+        color: "default",
+        borderColor: "blue"
+    });//End Program Message
+
+
     //Query All Roles
     const roleQuery = "SELECT * FROM role";
     connection.query(roleQuery, (err, res)=>{
@@ -255,6 +295,7 @@ function addEmployeeQuestions()
         let roleChoices = [];
         for(let i = 0; i < res.length; i++)
             roleChoices.push(`${i + 1}) ${res[i].title}`);
+        roleChoices.push("None");
 
         inquirer.prompt([
             {
@@ -276,8 +317,13 @@ function addEmployeeQuestions()
                 choices: roleChoices
             }
         ]).then(answers=>{
-            answers.roleId = answers.roleId.split(')')[0];
-            
+            if(answers.roleId === "None")
+                answers.roleId = null;
+            else
+                answers.roleId = answers.roleId.split(')')[0];
+            answers.firstName = capitalize_Words(answers.firstName);
+            answers.lastName = capitalize_Words(answers.lastName);
+
             //Insert Employee Prior To Asking For Manager
             const query = "INSERT INTO `employee` SET ?";
             connection.query(query, answers, (err, insertRes)=>{
@@ -297,7 +343,8 @@ function addEmployeeQuestions()
                     let managerChoices = [];
                     for(let i = 0; i < res.length; i++)
                         managerChoices.push(`${res[i].id}(ID) ${res[i].Manager}`);
-
+                    managerChoices.push("None");
+                    
                     inquirer.prompt([
                         {
                             type: "list",
@@ -306,14 +353,13 @@ function addEmployeeQuestions()
                             choices: managerChoices
                         }
                     ]).then(answer=>{
-                        answer.managerId = answer.managerId.split('(')[0];
-                        //Update Newly Added Employee With Manager Option
-                        const query = "UPDATE `employee` SET ? WHERE ?";
-                        connection.query(query, 
-                            [answer, {id: itemId}],(err, result)=>{
-                            if(err) throw err;
-                            runProgram();
-                        });//End new employee update
+                        if(answer.managerId == "None")
+                            answer.managerId = null;
+                        else
+                            answer.managerId = answer.managerId.split('(')[0];
+                        
+                        updateTable("employee", answer, itemId);
+
                     });
                 });//End Manager Query
 
@@ -339,6 +385,7 @@ function chooseDepartment(action)
         let departmentChoices = [];
         for(let i = 0; i < res.length; i++)
             departmentChoices.push(`${res[i].id}) ${res[i].department}`);
+        departmentChoices.push("None");
 
         inquirer.prompt([
             {
@@ -348,16 +395,23 @@ function chooseDepartment(action)
                 choices:  departmentChoices
             }
         ]).then(answer =>{
-            answer.id = answer.id.split(')')[0];
-            //Update the department
-            if(action == "Update")
+            if(answer.id === "None")
+                runProgram()
+            else
             {
-                for(let i = 0; i < res.length; i++)
-                    if(res[i].id == answer.id)
-                        updateDepartment(res[i]);
+                answer.id = answer.id.split(')')[0];
+                console.log(answer.id);
+                //Update the department
+                if(action == "Update")
+                {
+                    for(let i = 0; i < res.length; i++)
+                        if(res[i].id == answer.id)
+                            updateDepartment(res[i]);
+                }
+                else//Delete the department
+                    deleteFromTable("department", answer);
             }
-            else//Delete the department
-                deleteFromTable("department", answer);
+                
         });
     });//End Department query
 
@@ -379,6 +433,7 @@ function updateDepartment(dep)
             default: dep.department
         }
     ]).then(answer =>{
+        answer.department = capitalize_Words(answer.department);
         updateTable("department", answer, dep.id)
     })
 }//End updateDepartment
@@ -399,6 +454,7 @@ function chooseRole(action)
         let roleChoices = [];
         for(let i = 0; i < res.length; i++)
             roleChoices.push(`${res[i].id}) ${res[i].title}`);
+        roleChoices.push("None");
 
         inquirer.prompt([
             {
@@ -408,16 +464,21 @@ function chooseRole(action)
                 choices: roleChoices
             }
         ]).then(answer=>{
-            answer.id = answer.id.split(')')[0];
-            //Update Role
-            if(action == "Update")
+            if(answer.id === "None")
+                runProgram();
+            else
             {
-                for(let i = 0; i < res.length; i++)
-                    if(res[i].id == answer.id)
-                        updateRole(res[i]);
+                answer.id = answer.id.split(')')[0];
+                //Update Role
+                if(action == "Update")
+                {
+                    for(let i = 0; i < res.length; i++)
+                        if(res[i].id == answer.id)
+                            updateRole(res[i]);
+                }
+                else//Delete Role
+                    deleteFromTable("role", answer);
             }
-            else//Delete Role
-                deleteFromTable("role", answer)
         });
     });//End all role query
 }//end chooseRole
@@ -438,7 +499,7 @@ function updateRole(theRole)
         let departmentChoices = [];
         for(let i = 0; i < res.length; i++)
             departmentChoices.push(`${i + 1}) ${res[i].department}`);
-        
+        departmentChoices.push("None");
         inquirer.prompt([
             {
                 type: "input",
@@ -459,9 +520,13 @@ function updateRole(theRole)
                 message: "Please Select The Department",
                 choices: departmentChoices
             }
-        ]).then(answer=>{
-            answer.departmentId = answer.departmentId.split(')')[0];
-            updateTable("role", answer, theRole.id);
+        ]).then(answers=>{
+            if(answers.departmentId == "None")
+                answers.departmentId = null;
+            else
+                answers.departmentId = answers.departmentId.split(')')[0];
+            answers.title = capitalize_Words(answers.title);
+            updateTable("role", answers, theRole.id);
         });
     });//End Departments query
 
@@ -483,7 +548,7 @@ function chooseEmployee(action)
         let employeeChoices = [];
         for(let i = 0; i < res.length; i++)
             employeeChoices.push(`${res[i].id}) ${res[i].firstName} ${res[i].lastName}`);
-        
+        employeeChoices.push("None");
         inquirer.prompt([
             {
                 type: "list",
@@ -492,17 +557,22 @@ function chooseEmployee(action)
                 choices: employeeChoices
             }
         ]).then(answer=>{
-            answer.id = answer.id.split(')')[0];
-            //Update Employee
-            if(action == "Update")
+            if(answer.id === "None")
+                runProgram();
+            else
             {
-                for(let i = 0; i < res.length; i++)
-                    if(res[i].id == answer.id)
-                        updateEmployee(res[i]);
-            }   
-            else//Delete Employee
-                deleteFromTable("employee", answer)
-        })
+                answer.id = answer.id.split(')')[0];
+                //Update Employee
+                if(action == "Update")
+                {
+                    for(let i = 0; i < res.length; i++)
+                        if(res[i].id == answer.id)
+                            updateEmployee(res[i]);
+                }   
+                else//Delete Employee
+                    deleteFromTable("employee", answer);
+            }
+        });
     });//End all employee Query
 
 }//End chooseEmployee
@@ -523,6 +593,7 @@ function updateEmployee(emp)
         let roleChoices = [];
         for(let i = 0; i < res.length; i++)
             roleChoices.push(`${res[i].id}) ${res[i].title}`);
+        roleChoices.push("None");
         
         //Query All Manager Information
         const managerQuery =`SELECT T1.id, CONCAT(T1.firstName, ' ', T1.lastName) AS 'Manager'
@@ -535,7 +606,7 @@ function updateEmployee(emp)
             let managerChoices = [];
             for(let i = 0; i < res.length; i++)
                 managerChoices.push(`${res[i].id}) ${res[i].Manager}`);
-            
+            managerChoices.push("None");
             inquirer.prompt([
                 {
                     type: "input",
@@ -557,16 +628,67 @@ function updateEmployee(emp)
                     message: "Please pick employee Role",
                     choices: roleChoices
                 },
-                {
-                    type: "list",
-                    name: "managerId",
-                    message: "Please pick employee Manager",
-                    choices: managerChoices
-                }
+                // {
+                //     type: "list",
+                //     name: "managerId",
+                //     message: "Please pick employee Manager",
+                //     choices: managerChoices
+                // }
             ]).then(answers=>{
-                answers.roleId = answers.roleId.split(')')[0];
-                answers.managerId = answers.managerId.split(')')[0];
-                updateTable("employee", answers, emp.id)
+                if(answers.roleId == "None")
+                    answers.roleId = null;
+                else
+                    answers.roleId = answers.roleId.split(')')[0];
+                // if(answers.managerId == "None")
+                //     answers.managerId = null;
+                // else
+                //     answers.managerId = answers.managerId.split(')')[0];
+                answers.firstName = capitalize_Words(answers.firstName);
+                answers.lastName = capitalize_Words(answers.lastName);
+
+                const updateEmployeeQuery = "UPDATE employee SET ? WHERE ?";
+                connection.query(updateEmployeeQuery, 
+                [
+                    answers, 
+                    {
+                        id: emp.id
+                    }
+                ],
+                (err,res)=>{
+                    if(err) throw err;
+                    //Query All Managers
+                    const managerQuery = `SELECT T1.id, CONCAT(T1.firstName, ' ', T1.lastName) AS 'Manager'
+                    FROM employee AS T1
+                    INNER JOIN role AS T2 ON T1.roleId = T2.id
+                    WHERE T2.title = "Manager"`;
+                    connection.query(managerQuery, (err, res)=>{
+                        if(err) throw err;
+                        //Gather All Possible Managers
+                        let managerChoices = [];
+                        for(let i = 0; i < res.length; i++)
+                            managerChoices.push(`${res[i].id}(ID) ${res[i].Manager}`);
+                        managerChoices.push("None");
+                        
+                        inquirer.prompt([
+                            {
+                                type: "list",
+                                name: "managerId",
+                                message: "What is the employees manager id?",
+                                choices: managerChoices
+                            }
+                        ]).then(answer=>{
+                            if(answer.managerId == "None")
+                                answer.managerId = null;
+                            else
+                                answer.managerId = answer.managerId.split('(')[0];
+                            
+                            updateTable("employee", answer, emp.id);
+
+                        });
+                    });//End Manager Query
+                    
+                });
+                // updateTable("employee", answers, emp.id)
             });
         });//End Manager Query
 
@@ -574,7 +696,44 @@ function updateEmployee(emp)
 
 }//End updateEmployee()
 
+
 //#endregion programfunctions
+
+//#region helperFunctions
+
+/**
+ * capitalize_Words()
+ * Purpose: To Take a string and capatilize every word after a space
+ * Parameters: str - String to be altered
+ * Return: str - Altered by Making every word after to be uppercase
+ * Reference: https://www.w3resource.com/javascript-exercises/javascript-string-exercise-9.php
+ */
+function capitalize_Words(str)
+{
+    return str.replace(/\w\S*/g, txt=>{return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}//End capitalize_Words()   
+
+/**
+ * printQueryStatus()
+ * Purpose: Print the status message with given information from query
+ * Parameters:id - ID updated, deleted or added
+ *            table - table altered
+ *            action - table alteration that occured
+ * Return: None
+ */
+function printQueryStatus(id, table, action)
+{
+    //Beginning Program Message
+    printMessage([`Id ${id} For Table ${table} ${action}`],
+    {
+        border: true,
+        color: "default",
+        borderColor: "blue",
+        marginBottom: 2,
+    });//End Program Message
+}//end printQueryStatus()
+
+//#endregion helperFunctions
 
 //#region sqlQueryFunctions
 
@@ -588,10 +747,9 @@ function updateEmployee(emp)
 function insertIntoTable(table, information)
 {
     const query = "INSERT INTO ?? SET ?";
-    connection.query(query,[table,information],
-    function(err, res) {
+    connection.query(query,[table,information],(err, res)=>{
         if (err) throw err;
-        console.log(res.affectedRows + ` ${table} added!\n`);
+        printQueryStatus(res.insertId, table, "Added")
         runProgram();
     });
 }//End insertIntoTable
@@ -605,14 +763,17 @@ function insertIntoTable(table, information)
 function viewTable(table)
 {
     const query = "SELECT * FROM ??";
-    connection.query(query,
-        table,
-        (err, res) =>{
+    connection.query(query,table,(err, res) =>{
             if(err) throw err;
-            console.log('\n')
+            printMessage([`Viewing Information From ${table} Table`],
+            {
+                border: true,
+                color: "default",
+                borderColor: "blue"
+            });
             console.table(res);
             runProgram();
-        });
+    });
 }//End viewTable
 
 /**
@@ -630,7 +791,12 @@ function viewAllInformation()
     LEFT JOIN employee AS manager ON (manager.id = main.managerId);`
     connection.query(query, (err, res)=>{
         if(err) throw err;
-        console.log('\n');
+        printMessage([`Viewing All Combined Information`],
+        {
+            border: true,
+            color: "default",
+            borderColor: "blue"
+        });//End Program Message
         console.table(res);
         runProgram();
     });
@@ -654,10 +820,9 @@ function updateTable(table, information, itemId)
             {
                 id: itemId
             }
-        ],
-        (err,res) =>{
+        ],(err,res) =>{
             if(err) throw err;
-            console.log("Row updated \n");
+            printQueryStatus(itemId, table, "Updated");
             runProgram(); 
         });
 }//End updatedTable()
@@ -672,14 +837,11 @@ function updateTable(table, information, itemId)
 function deleteFromTable(table, itemId)
 {
     const query = "DELETE FROM ?? WHERE ?";
-    connection.query(query, 
-        [table, itemId],
-        (err, res)=>{
-            if(err) throw err;
-            console.log("Row Deleted \n");
-            runProgram();
-    })
-
+    connection.query(query, [table, itemId],(err, res)=>{
+        if(err) throw err;
+        printQueryStatus(itemId.id, table, "Deleted");
+        runProgram();
+    });
 }//End deleteFromTable
 
 //#endregion sqlQueryFunctions
